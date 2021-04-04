@@ -1,24 +1,26 @@
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+
+;; -------------------------------------------------------------------------------------
+;; ---------------------      INITIALIZE       -----------------------------------------
+;; -------------------------------------------------------------------------------------
+
+;; SETUP YOUR PROXY IF NEEDED
+;; (setq url-proxy-services
+;;       '(("no_proxy" . "^\\(localhost\\|10.*\\)")
+;;         ("http" . "company.com:8080")
+;;         ("https" . "company.com:8080")))
 
 ;; -------------------------------------------------------------------------------------
 ;; ----------------------------    THEME     -------------------------------------------
 ;; -------------------------------------------------------------------------------------
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 
 ;; (load-theme 'wombat)
-(load-theme 'spacemacs-light t)
+;; (load-theme 'spacemacs-light)
+(require 'cl-lib)
+(load-file "~/.emacs.d/elpa/spacemacs-theme-20210206.1428/spacemacs-common.el")
+(load-file "~/.emacs.d/elpa/spacemacs-theme-20210206.1428/spacemacs-light-theme.el")
 
-;; a great font: https://www.fontyukle.net/en/Monaco.ttf
+;; a great font: httpss://www.fontyukle.net/en/Monaco.ttf
 (condition-case nil
     (set-default-font "Monaco")
   (error nil))
@@ -32,10 +34,10 @@
 ;;  '(fringe ((t (:background "#242424"))))
 ;;  '(linum ((t (:inherit (shadow default) :background "#191919" :foreground "#505050")))))
 
+
 ;; -------------------------------------------------------------------------------------
 ;; ---------------------    ENHANCEMENTS     -------------------------------------------
 ;; -------------------------------------------------------------------------------------
-
 ;; Make mouse work
 (require 'mwheel)
 (require 'mouse)
@@ -44,11 +46,10 @@
 (global-set-key [mouse-4] 'previous-line)
 (global-set-key [mouse-5] 'next-line)
 
-
 ;; remove unecessary UI
 (menu-bar-mode -1)
-;; (scroll-bar-mode 0)
-;; (tool-bar-mode 0)
+(scroll-bar-mode 0)
+(tool-bar-mode 0)
 (setq visible-bell 1)
 (setq ring-bell-function 'ignore)
 
@@ -58,7 +59,7 @@
 (setq initial-scratch-message nil)
 
 ;; remove whitespace before saving
-;; (add-hook 'before-save-hook 'whitespace-cleanup)
+(add-hook 'before-save-hook 'whitespace-cleanup)
 
 ;; faster to quit
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -73,16 +74,8 @@
 ;; display matching parenthesis
 (show-paren-mode 1)
 
-;; usefull stuff before saving
-;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
-;; (add-hook 'before-save-hook '(lamdba () (require 'saveplace)(setq-default save-place t)))
-
 ;; refresh buffers when any file change
 (global-auto-revert-mode t)
-
-;; display time
-;; (load "time" t t)
-;; (display-time)
 
 ;; track recently opened file
 (recentf-mode t)
@@ -124,12 +117,18 @@
 
 ;; indentation
 (setq-default indent-tabs-mode nil)
-(setq-default tab-width 2)
-(setq standard-indent 2)
-(setq indent-line-function 'insert-tab)
-(setq tab-width 2)
-(setq tab-stop-list '(2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52 54 56 58 60 62 64 66 68 70 72 74 76 78 80))
-(setq indent-tabs-mode nil)
+;; (setq-default tab-width 4)
+;; (setq standard-indent 4)
+;; (setq indent-line-function 'insert-tab)
+;; (setq tab-width 4)
+;; (setq tab-stop-list '(4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80))
+;; (setq indent-tabs-mode nil)
+
+(add-hook 'python-mode-hook
+  (lambda ()
+    (setq indent-tabs-mode t)
+    (setq tab-width 2)
+    (setq python-indent-offset 2)))
 
 ;; disable backup files
 (setq make-backup-files nil)
@@ -137,6 +136,31 @@
 ;; auto wraping
 (set-default 'truncate-lines t)
 (add-hook 'text-mode-hook (lambda () (setq truncate-lines nil)))
+
+;; setup ido for selecting file
+(ido-mode)
+(setq ido-enable-flex-matching t)
+(setq resize-mini-windows t)
+(add-hook 'minibuffer-setup-hook
+      (lambda () (setq truncate-lines nil)))
+(setq ido-decorations '("\n-> " "" "\n   " "\n   ..."
+            "[" "]" " [No match]" " [Matched]"
+            " [Not readable]" " [Too big]" " [Confirm]"))
+(add-to-list 'ido-ignore-buffers "*Messages*")
+(add-to-list 'ido-ignore-buffers "*Buffer*")
+(add-to-list 'ido-ignore-buffers "*ESS*")
+(add-to-list 'ido-ignore-buffers "*NeoTree*")
+(add-to-list 'ido-ignore-buffers "*Completions*")
+(add-to-list 'ido-ignore-buffers "*Help*")
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ido-first-match ((t (:inherit (quote font-lock-comment-face)))))
+ '(ido-only-match ((t (:inherit (quote font-lock-comment-face)))))
+ '(ido-subdir ((t (:inherit (quote font-lock-keyword-face))))))
+
 
 ;; line wrap
 (setq linum-format "%d ")
@@ -162,8 +186,16 @@
 (defun load-package-manager ()
   (package-initialize)
   (require 'package)
-  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/")))
+  (add-to-list 'package-archives '("melpa" . "http://stable.melpa.org/packages/")))
 (add-hook 'after-init-hook 'load-package-manager)
+
+;; Hide left line indicator
+(setf (cdr (assq 'continuation fringe-indicator-alist))
+      '(nil nil) ;; no continuation indicators
+      ;; '(nil right-curly-arrow) ;; right indicator only
+      ;; '(left-curly-arrow nil) ;; left indicator only
+      ;; '(left-curly-arrow right-curly-arrow) ;; default
+      )
 
 ;; Window split line
 (set-face-attribute 'vertical-border nil :foreground "#303030")
@@ -188,7 +220,7 @@
 ;;   (add-to-list
 ;;    'package-archives
 ;;    ;; '("melpa" . "http://stable.melpa.org/packages/") ; many packages won't show if using stable
-;;    '("melpa" . "http://melpa.milkbox.net/packages/")
+;;    '("melpa" . "http://melpa.org/packages/")
 ;;    t))
 
 (custom-set-variables
@@ -198,40 +230,37 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("a7760b614d51ba59af9bd4a87014e688cdcb7df36e971e21abc23cc7ad0cdfbc" default)))
+    ("fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
  '(git-commit-summary-max-length 100)
  '(package-selected-packages
    (quote
-    (undo-fu silkworm-theme smooth-scroll ## find-file-in-project projectile helm-ag dumb-jump helm))))
+    (## find-file-in-project projectile helm-ag dumb-jump helm))))
 
-;; (load-theme 'silkworm)
+
+;;(mapc
+;; (lambda(path) (load-file path))
+;; (directory-files "~/.emacs.d/conf/" t "\.el$"))
+
+;; (global-set-key (kbd "M-x") 'helm-M-x)
+;; (helm-projectile-on)
 
 ;; (projectile-global-mode)
 (setq projectile-enable-caching t)
 
-;; (setq x-select-enable-clipboard t)
-;; (setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
+(setq x-select-enable-clipboard t)
 
 ;; Tell emacs where is your personal elisp lib dir
 (add-to-list 'load-path "~/.emacs.d/lisp/")
-;; load the packaged named xyz.
+
 (load "highlight-symbol") ;; best not to include the ending “.el” or “.elc”
 
 (defun reload-dotemacs ()
   (interactive)
   (load-file "~/.emacs.d/init.el"))
 
-(add-hook 'python-mode-hook
-  (lambda ()
-    (setq indent-tabs-mode t)
-    (setq tab-width 2)
-    (setq python-indent-offset 2)))
+;; (straight-use-package 'dumb-jump)
 
-(straight-use-package 'dumb-jump)
-(straight-use-package 'find-file-in-project)
-(straight-use-package 'helm)
-(straight-use-package 'helm-ag)
-
+;; (Global-Unset-key (kbd "C-z"))
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "M-s") 'save-buffer)
 (global-set-key (kbd "M-q") 'quit-window)
@@ -250,4 +279,3 @@
 
 (global-set-key (kbd "\C-b") 'undo-fu-only-undo)
 (global-set-key (kbd "\C-n") 'undo-fu-only-redo)
-
