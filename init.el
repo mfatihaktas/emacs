@@ -168,6 +168,9 @@
 ;; Window split line
 (set-face-attribute 'vertical-border nil :foreground "#303030")
 
+;; Remove all trailing white spaces while saving
+(add-hook 'write-file-hooks 'delete-trailing-whitespace)
+
 ;; -------------------------------------------------------------------------------------
 ;; ---------------------      PLUGINS          -----------------------------------------
 ;; -------------------------------------------------------------------------------------
@@ -221,11 +224,23 @@
   (interactive)
   (load-file "~/.emacs.d/init.el"))
 
+(defun ssh-orbit ()
+  (interactive)
+  (find-file "/ssh:mehmet@console.sb1.orbit-lab.org:/home/mehmet"))
+
 (add-hook 'python-mode-hook
   (lambda ()
     (setq indent-tabs-mode t)
     (setq tab-width 2)
     (setq python-indent-offset 2)))
+
+;; (add-hook 'shell-mode-hook
+;;   (lambda ()
+;;     (setq indent-tabs-mode t)
+;;     (setq tab-width 2)
+;;     (setq python-indent-offset 2)))
+
+(setq sh-basic-offset 2)
 
 (straight-use-package 'dumb-jump)
 (straight-use-package 'find-file-in-project)
@@ -250,4 +265,3 @@
 
 (global-set-key (kbd "\C-b") 'undo-fu-only-undo)
 (global-set-key (kbd "\C-n") 'undo-fu-only-redo)
-
