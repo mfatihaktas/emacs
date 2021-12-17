@@ -16,7 +16,21 @@
 ;; -------------------------------------------------------------------------------------
 
 ;; (load-theme 'wombat)
-(load-theme 'spacemacs-light t)
+;; (load-theme 'spacemacs-light t)
+;; (load-theme 'spacemacs-dark t)
+;; (load-theme 'zenburn t)
+;; (load-theme 'twilight-bright)
+;; (load-theme 'autumn-light)
+;; (load-theme 'paper)
+;; (load-theme 'occidental)
+
+;; (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+;; (require 'cl-lib)
+;; (load-file "~/.emacs.d/themes/spacemacs-common.el")
+;; (load-file "~/.emacs.d/themes/spacemacs-light-theme.el")
+;; (load-file "~/.emacs.d/themes/aalto-light-theme.el")
+
+;; (setq base16-theme-256-color-source "base16-shell")
 
 ;; a great font: https://www.fontyukle.net/en/Monaco.ttf
 (condition-case nil
@@ -200,17 +214,15 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   (quote
-    ("a7760b614d51ba59af9bd4a87014e688cdcb7df36e971e21abc23cc7ad0cdfbc" default)))
+    '("1a1266e25ed97448bbe80f246f53372d4b914d30802711abfda7afcbf2f7b3ec" "859ff6182156e4bea960c2c7678f8b3da23961046b855e805f0f5a5d09b92658" "aa6638f0cd2ba2c68be03220ea73495116dc6f0b625405ede34087c1babb71ae" "76b4632612953d1a8976d983c4fdf5c3af92d216e2f87ce2b0726a1f37606158" "a7760b614d51ba59af9bd4a87014e688cdcb7df36e971e21abc23cc7ad0cdfbc" default))
  '(git-commit-summary-max-length 100)
  '(package-selected-packages
-   (quote
-    (undo-fu silkworm-theme smooth-scroll ## find-file-in-project projectile helm-ag dumb-jump helm))))
+    '(undo-fu silkworm-theme smooth-scroll ## find-file-in-project helm-ag dumb-jump helm)))
 
 ;; (load-theme 'silkworm)
 
 ;; (projectile-global-mode)
-(setq projectile-enable-caching t)
+;; (setq projectile-enable-caching t)
 
 ;; (setq x-select-enable-clipboard t)
 ;; (setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
@@ -220,13 +232,49 @@
 ;; load the packaged named xyz.
 (load "highlight-symbol") ;; best not to include the ending “.el” or “.elc”
 
+;; (custom-set-variables
+;;  '(highlight-symbol-colors
+;;    (quote
+;;     ("DeepPink" "cyan" "DarkRed" "DarkBlue" "tomato" "magenta1" )))
+;;  )
+
 (defun reload-dotemacs ()
   (interactive)
   (load-file "~/.emacs.d/init.el"))
 
-(defun ssh-orbit ()
+(defun ssh-o1 ()
   (interactive)
   (find-file "/ssh:mehmet@console.sb1.orbit-lab.org:/home/mehmet"))
+
+(defun ssh-o2 ()
+  (interactive)
+  (find-file "/ssh:mehmet@console.sb2.orbit-lab.org:/home/mehmet"))
+
+(defun ssh-o4 ()
+  (interactive)
+  (find-file "/ssh:mehmet@console.sb4.orbit-lab.org:/home/mehmet"))
+
+(defun ssh-o1-1 ()
+  (interactive)
+  (find-file "/ssh:mehmet@console.sb1.orbit-lab.org|ssh:root@node1-1:/root/edge-load-balance"))
+
+(defun ssh-o4-1 ()
+  (interactive)
+  (find-file "/ssh:mehmet@console.sb4.orbit-lab.org|ssh:root@node1-1:/root/edge-load-balance"))
+
+(defun ssh-o4-5 ()
+  (interactive)
+  (find-file "/ssh:mehmet@console.sb4.orbit-lab.org|ssh:root@node1-5:/root/edge-load-balance"))
+
+(require 'tramp)
+(setq tramp-default-method "ssh")
+;; (setq tramp-verbose 8)
+;; (add-to-list 'tramp-default-proxies-alist
+;;              '("ORBIT" nil "/ssh:mehmet@console.sb1.orbit-lab.org:"))
+
+(defun ssh-amarel ()
+  (interactive)
+  (find-file "/ssh:mehmet@console.sb1.orbit-lab.org|ssh:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
 
 (add-hook 'python-mode-hook
   (lambda ()
@@ -265,3 +313,12 @@
 
 (global-set-key (kbd "\C-b") 'undo-fu-only-undo)
 (global-set-key (kbd "\C-n") 'undo-fu-only-redo)
+(global-set-key (kbd "C-_") '
+  comment-or-uncomment-region)
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
