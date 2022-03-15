@@ -14,7 +14,6 @@
 ;; -------------------------------------------------------------------------------------
 ;; ----------------------------    THEME     -------------------------------------------
 ;; -------------------------------------------------------------------------------------
-
 ;; (load-theme 'wombat)
 (load-theme 'spacemacs-light t)
 ;; (load-theme 'spacemacs-dark t)
@@ -49,6 +48,8 @@
 ;; -------------------------------------------------------------------------------------
 ;; ---------------------    ENHANCEMENTS     -------------------------------------------
 ;; -------------------------------------------------------------------------------------
+;; Add a newline at the end of file
+(setq require-final-newline t)
 
 ;; Make mouse work
 (require 'mwheel)
@@ -136,15 +137,6 @@
 (setq scroll-margin 7)
 (setq scroll-conservatively 5)
 
-;; indentation
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 2)
-(setq standard-indent 2)
-(setq indent-line-function 'insert-tab)
-(setq tab-width 2)
-(setq tab-stop-list '(2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52 54 56 58 60 62 64 66 68 70 72 74 76 78 80))
-(setq indent-tabs-mode nil)
-
 ;; disable backup files
 (setq make-backup-files nil)
 
@@ -182,8 +174,9 @@
 ;; Window split line
 (set-face-attribute 'vertical-border nil :foreground "#303030")
 
+;; CAUTION: This turns spaces into tabs after saving
 ;; Remove all trailing white spaces while saving
-(add-hook 'write-file-hooks 'delete-trailing-whitespace)
+;; (add-hook 'write-file-hooks 'delete-trailing-whitespace)
 
 ;; -------------------------------------------------------------------------------------
 ;; ---------------------      PLUGINS          -----------------------------------------
@@ -276,17 +269,70 @@
   (interactive)
   (find-file "/ssh:mehmet@console.sb1.orbit-lab.org|ssh:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
 
-(add-hook 'python-mode-hook
-  (lambda ()
-    (setq indent-tabs-mode t)
-    (setq tab-width 2)
-    (setq python-indent-offset 2)))
+;; https://emacs.stackexchange.com/questions/47424/tramp-gcloud-compute-ssh-not-working
+(require 'tramp)
+(add-to-list 'tramp-methods
+             '("gcssh"
+              (tramp-login-program        "gcloud compute ssh")
+              (tramp-login-args           (("%h")))
+              (tramp-async-args           (("-q")))
+              (tramp-remote-shell         "/bin/sh")
+              (tramp-remote-shell-args    ("-c"))
+              (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+                                           ("-o" "UserKnownHostsFile=/dev/null")
+                                           ("-o" "StrictHostKeyChecking=no")))
+              (tramp-default-port         22)))
+
+(defun ssh-mehmet-docker ()
+ (interactive)
+ (find-file "/gcssh:mehmet_overjet_ai@mehmet-docker:/home/mehmet_overjet_ai"))
+
+;; (defun ssh-gcp ()
+;;   (interactive)
+;;   (find-file "/gcloud compute ssh:mehmet_overjet_ai@mehmet-1-vm:/home/mehmet_overjet_ai"))
+
+
+;; (add-hook 'python-mode-hook
+;;   (lambda ()
+;;     (setq indent-tabs-mode t)
+;;     (setq tab-width 2)
+;;     (setq python-indent-offset 2)))
 
 ;; (add-hook 'shell-mode-hook
 ;;   (lambda ()
 ;;     (setq indent-tabs-mode t)
 ;;     (setq tab-width 2)
 ;;     (setq python-indent-offset 2)))
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+;; indentation
+;; Note: setq-default does not work for some reason
+(setq custom-tab-width 4)
+
+(setq indent-tabs-mode nil)
+
+;; (add-hook 'python-mode-hook
+;;   (lambda ()
+;;     (setq indent-tabs-mode nil)))
+(setq python-indent-offset custom-tab-width)
+
+(defun disable-tabs ()
+  (interactive)
+  (setq indent-tabs-mode nil))
+
+(defun enable-tabs  ()
+  (local-set-key (kbd "TAB") 'tab-to-tab-stop)
+  (setq indent-tabs-mode t)
+  (setq tab-width custom-tab-width))
+
+;; Automatically enable anaconda-mode in all python buffers
+(add-hook 'python-mode-hook 'anaconda-mode)
 
 (setq sh-basic-offset 2)
 
@@ -319,10 +365,3 @@
 (global-set-key (kbd "\C-n") 'undo-fu-only-redo)
 (global-set-key (kbd "C-_") '
   comment-or-uncomment-region)
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
