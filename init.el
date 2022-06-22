@@ -1,3 +1,10 @@
+;; (when (fboundp 'native-compile-async)
+;;   (native-compile-async "/Users/mehmetaktas/.emacs.d/init.el"))
+
+;; (defvar comp-deferred-compilation-deny-list ())
+
+(setq straight-disable-native-compile t)
+
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -73,7 +80,7 @@
 (setq initial-scratch-message nil)
 
 ;; remove whitespace before saving
-;; (add-hook 'before-save-hook 'whitespace-cleanup)
+(add-hook 'before-save-hook 'whitespace-cleanup)
 
 ;; faster to quit
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -87,10 +94,6 @@
 
 ;; display matching parenthesis
 (show-paren-mode 1)
-
-;; usefull stuff before saving
-;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
-;; (add-hook 'before-save-hook '(lamdba () (require 'saveplace)(setq-default save-place t)))
 
 ;; refresh buffers when any file change
 (global-auto-revert-mode t)
@@ -133,9 +136,8 @@
 
 ;; scroll
 (setq scroll-step 1)
-(setq scroll-conservatively 10)
-(setq scroll-margin 7)
-(setq scroll-conservatively 5)
+(setq scroll-margin 20)
+(setq scroll-conservatively 1)
 
 ;; disable backup files
 (setq make-backup-files nil)
@@ -224,6 +226,7 @@
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 ;; load the packaged named xyz.
 (load "highlight-symbol") ;; best not to include the ending “.el” or “.elc”
+(load "move-text")
 
 ;; (custom-set-variables
 ;;  '(highlight-symbol-colors
@@ -332,7 +335,66 @@
   (setq tab-width custom-tab-width))
 
 ;; Automatically enable anaconda-mode in all python buffers
-(add-hook 'python-mode-hook 'anaconda-mode)
+;; (add-hook 'python-mode-hook 'anaconda-mode)
+
+;; (package-initialize)
+;; (elpy-enable)
+
+;; Kills the entire line plus the newline whenever invoke kill-line (C-k)
+(setq kill-whole-line t)
+
+
+;; https://www.emacswiki.org/emacs/CopyWithoutSelection
+(defun get-point (symbol &optional arg)
+  "get the point"
+  (funcall symbol arg)
+  (point))
+
+(defun copy-thing (begin-of-thing end-of-thing &optional arg)
+  "Copy thing between beg & end into kill ring."
+  (save-excursion
+    (let ((beg (get-point begin-of-thing 1))
+          (end (get-point end-of-thing arg)))
+      (copy-region-as-kill beg end))))
+
+(defun paste-to-mark (&optional arg)
+  "Paste things to mark, or to the prompt in shell-mode."
+  (unless (eq arg 1)
+    (if (string= "shell-mode" major-mode)
+        (comint-next-prompt 25535)
+      (goto-char (mark)))
+    (yank)))
+
+(defun copy-word (&optional arg)
+  "Copy words at point into kill-ring"
+  (superword-mode 1)
+  (interactive "P")
+  (copy-thing 'backward-word 'forward-word arg)
+  ;;(paste-to-mark arg)
+  (superword-mode -1)
+  (message "Copied word"))
+
+(defun select-word (&optional arg)
+  (superword-mode 1)
+  (interactive "P")
+  (left-word)
+  (mark-word)
+  (superword-mode -1)
+  (message "Selected word"))
+
+;; https://stackoverflow.com/questions/22479533/emacs-copy-current-line
+(defun copy-line ()
+  (interactive)
+  (save-excursion
+    (back-to-indentation)
+    (kill-ring-save
+     (point)
+     (line-end-position)))
+     (message "Copied line"))
+
+;; Ref: http://tkf.github.io/emacs-jedi/latest/
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)                 ; optional
 
 (setq sh-basic-offset 2)
 
@@ -349,19 +411,80 @@
 (global-set-key (kbd "M-s") 'save-buffer)
 (global-set-key (kbd "M-q") 'quit-window)
 (global-set-key (kbd "M-o") 'other-window)
-(global-set-key (kbd "M-l") 'beginning-of-line)
-(global-set-key (kbd "M-r") 'end-of-line)
 (global-set-key (kbd "M-n") 'find-file-in-project)
 (global-set-key (kbd "M-f") 'find-file)
 (global-set-key (kbd "M-g") 'helm-ag)
-(global-set-key (kbd "M-l") 'goto-line)
+(global-set-key (kbd "M-i") 'goto-line)
 (global-set-key (kbd "M-h") 'highlight-symbol)
 (global-set-key (kbd "M-S-h") 'highlight-symbol-remove-all)
 (global-set-key (kbd "M-b") 'helm-buffers-list)
 (global-set-key (kbd "M-m") 'helm-mini)
 (global-set-key (kbd "M-d") 'delete-window)
 
-(global-set-key (kbd "\C-b") 'undo-fu-only-undo)
+(global-set-key (kbd "\C-z") 'undo-fu-only-undo)
 (global-set-key (kbd "\C-n") 'undo-fu-only-redo)
+(global-set-key (kbd "\C-p") 'yank)
+;; (global-set-key (kbd "\C-o") 'yank)
+(global-set-key (kbd "\C-s") 'swiper)
 (global-set-key (kbd "C-_") '
   comment-or-uncomment-region)
+
+;; (load-file "/Users/mehmetaktas/.emacs.d/emacs-for-python/epy-init.el")
+
+;; (define-key anaconda-mode-map (kbd "M-S-.") 'anaconda-find-definitions)
+;; (global-set-key (kbd "M-S-.") 'anaconda-find-definitions)
+
+;; (global-unset-key (kbd "M-."))
+(global-set-key (kbd "M-.") 'dumb-jump-go)
+;; (global-unset-key (kbd "M-,"))
+(global-set-key (kbd "M-,") 'dumb-jump-back)
+
+(global-set-key (kbd "M-j") 'jedi:goto-definition)
+
+(global-set-key (kbd "M-=") 'move-text-line-up)
+(global-set-key (kbd "M--") 'move-text-line-down)
+
+(global-set-key (kbd "M-+") 'move-text-region-up)
+(global-set-key (kbd "M-_") 'move-text-region-down)
+
+(global-set-key (kbd "M-l") 'copy-line)
+(global-set-key (kbd "M-c") 'copy-word)
+(global-set-key (kbd "M-a") 'select-word)
+(global-set-key (kbd "M-/") 'back-to-indentation)
+
+;; (global-set-key (kbd "M-[") 'left-word)
+;; (global-set-key (kbd "M-]") 'right-word)
+;; (global-set-key (kbd "M-+") 'paragraph-forward)
+;; (global-set-key (kbd "M-'") 'paragraph-backward)
+
+;; (define-key key-translation-map (kbd "<left>") (kbd "["))
+;; (define-key key-translation-map (kbd "[") (kbd "<left>"))
+;; (define-key key-translation-map (kbd "<right>") (kbd "]"))
+;; (define-key key-translation-map (kbd "]") (kbd "<right>"))
+;; (define-key key-translation-map (kbd "<up>") (kbd "="))
+;; (define-key key-translation-map (kbd "=") (kbd "<up>"))
+;; (define-key key-translation-map (kbd "<down>") (kbd "'"))
+;; (define-key key-translation-map (kbd "'") (kbd "<down>"))
+
+;; (global-set-key (kbd "M-[") 'backward-paragraph)
+;; (global-set-key (kbd "M-]") 'forward-paragraph)
+;; (global-set-key (kbd "M-[") 'left-word)
+;; (global-set-key (kbd "M-]") 'right-word)
+
+;; (global-set-key (kbd "M-f") 'end-of-line)
+;; (global-set-key (kbd "M-b") 'beginning-of-line)
+
+
+;; (package-install 'flycheck)
+;; (global-flycheck-mode)
+;; (package-install 'exec-path-from-shell)
+;; (exec-path-from-shell-initialize)
+
+
+;; Move to beginning of line
+;; Select a word
+;; Prevent from copying while killing
+;; Comment out a line without having to going to beginning of line
+
+;; (setq x-select-enable-clipboard nil)
+;; (setq x-select-enable-primary nil)
