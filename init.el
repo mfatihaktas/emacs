@@ -11,9 +11,9 @@
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
+	(url-retrieve-synchronously
+	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	 'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
@@ -275,16 +275,16 @@
 ;; https://emacs.stackexchange.com/questions/47424/tramp-gcloud-compute-ssh-not-working
 (require 'tramp)
 (add-to-list 'tramp-methods
-             '("gcssh"
-              (tramp-login-program        "gcloud compute ssh")
-              (tramp-login-args           (("%h")))
-              (tramp-async-args           (("-q")))
-              (tramp-remote-shell         "/bin/sh")
-              (tramp-remote-shell-args    ("-c"))
-              (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
-                                           ("-o" "UserKnownHostsFile=/dev/null")
-                                           ("-o" "StrictHostKeyChecking=no")))
-              (tramp-default-port         22)))
+	     '("gcssh"
+	      (tramp-login-program        "gcloud compute ssh")
+	      (tramp-login-args           (("%h")))
+	      (tramp-async-args           (("-q")))
+	      (tramp-remote-shell         "/bin/sh")
+	      (tramp-remote-shell-args    ("-c"))
+	      (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+					   ("-o" "UserKnownHostsFile=/dev/null")
+					   ("-o" "StrictHostKeyChecking=no")))
+	      (tramp-default-port         22)))
 
 (defun ssh-mehmet-docker ()
  (interactive)
@@ -354,14 +354,14 @@
   "Copy thing between beg & end into kill ring."
   (save-excursion
     (let ((beg (get-point begin-of-thing 1))
-          (end (get-point end-of-thing arg)))
+	  (end (get-point end-of-thing arg)))
       (copy-region-as-kill beg end))))
 
 (defun paste-to-mark (&optional arg)
   "Paste things to mark, or to the prompt in shell-mode."
   (unless (eq arg 1)
     (if (string= "shell-mode" major-mode)
-        (comint-next-prompt 25535)
+	(comint-next-prompt 25535)
       (goto-char (mark)))
     (yank)))
 
@@ -403,9 +403,20 @@
 (straight-use-package 'helm)
 (straight-use-package 'helm-ag)
 
+
 ;; https://github.com/redguardtoo/find-file-in-project
 (require 'find-file-in-project)
 (helm-mode 1)
+
+;; Note: Follow these two guidelines while creating a key binding
+;; 1. Run `describe-key` and press the key combination. This will show the
+;; key combination that is read by Emacs. This combination can then be set
+;; to a command like
+;; (global-set-key (kbd "M-x") 'helm-M-x)
+;;
+;; 2. Run `Ctrl + q` then press the key combination. This will show the code
+;; received by Emacs. The code can then be set to a command like
+;; (global-set-key "[1;9A" 'helm-mini)
 
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "M-s") 'save-buffer)
@@ -416,28 +427,22 @@
 (global-set-key (kbd "M-g") 'helm-ag)
 (global-set-key (kbd "M-i") 'goto-line)
 (global-set-key (kbd "M-h") 'highlight-symbol)
-(global-set-key (kbd "M-S-h") 'highlight-symbol-remove-all)
-(global-set-key (kbd "M-b") 'helm-buffers-list)
+;; (global-set-key (kbd "ESC-M-h") 'highlight-symbol-remove-all)
+;; (global-set-key (kbd "M-b") 'helm-buffers-list)
 (global-set-key (kbd "M-m") 'helm-mini)
 (global-set-key (kbd "M-d") 'delete-window)
 
 (global-set-key (kbd "\C-z") 'undo-fu-only-undo)
 (global-set-key (kbd "\C-n") 'undo-fu-only-redo)
 (global-set-key (kbd "\C-p") 'yank)
-;; (global-set-key (kbd "\C-o") 'yank)
+(global-set-key (kbd "\C-]") 'yank)
+(global-set-key (kbd "M-e") 'yank)
+;; (global-set-key (kbd "\C-q") 'keyboard-quit)
+;; (global-set-key (kbd "\C-h") 'keyboard-escape-quit)
+;; (global-set-key (kbd "\C-o") 'isearch-yank-kill)
 (global-set-key (kbd "\C-s") 'swiper)
 (global-set-key (kbd "C-_") '
   comment-or-uncomment-region)
-
-;; (load-file "/Users/mehmetaktas/.emacs.d/emacs-for-python/epy-init.el")
-
-;; (define-key anaconda-mode-map (kbd "M-S-.") 'anaconda-find-definitions)
-;; (global-set-key (kbd "M-S-.") 'anaconda-find-definitions)
-
-;; (global-unset-key (kbd "M-."))
-(global-set-key (kbd "M-.") 'dumb-jump-go)
-;; (global-unset-key (kbd "M-,"))
-(global-set-key (kbd "M-,") 'dumb-jump-back)
 
 (global-set-key (kbd "M-j") 'jedi:goto-definition)
 
@@ -448,9 +453,22 @@
 (global-set-key (kbd "M-_") 'move-text-region-down)
 
 (global-set-key (kbd "M-l") 'copy-line)
+(global-set-key (kbd "M-f") 'copy-line)
 (global-set-key (kbd "M-c") 'copy-word)
 (global-set-key (kbd "M-a") 'select-word)
-(global-set-key (kbd "M-/") 'back-to-indentation)
+
+;; (global-set-key (kbd "M-.") 'dumb-jump-go)
+;; (global-set-key (kbd "M-,") 'dumb-jump-back)
+(global-set-key "[1;9A" 'helm-mini) ;; (kbd "M-<up>")
+(global-set-key "[1;9B" 'find-file) ;; (kbd "M-<down>")
+
+(global-set-key "[1;10A" 'dumb-jump-go) ;; (kbd "M-S-<up>")
+(global-set-key "[1;10B" 'dumb-jump-back) ;; (kbd "M-S-<down>")
+
+(global-set-key "[1;10D" 'undo-fu-only-undo) ;; (kbd "M-S-<left>")
+(global-set-key "[1;10C" 'undo-fu-only-redo) ;; (kbd "M-S-<right>")
+
+(global-set-key (kbd "M-b") 'back-to-indentation)
 
 ;; (global-set-key (kbd "M-[") 'left-word)
 ;; (global-set-key (kbd "M-]") 'right-word)
