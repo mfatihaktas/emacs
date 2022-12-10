@@ -1,0 +1,17 @@
+2019-05-21  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* realgud-ipdb.el: Author should be a valid email
+
+2019-05-21  Stefan Monnier  <monnier@iro.umontreal.ca>
+
+	* ipdb/track-mode.el: Fix typo
+
+2019-05-19  rocky  <rocky@gnu.org>
+
+	Add 'packages/realgud-ipdb/' from commit
+	'3e96d7cd7351b042c4f0a631f75efc699edce0d2'
+
+	git-subtree-dir: packages/realgud-ipdb git-subtree-mainline:
+	c8ae9fe6ad53f8aeb6a9982d1e48ddc78c231fea git-subtree-split:
+	3e96d7cd7351b042c4f0a631f75efc699edce0d2
+
