@@ -11,12 +11,38 @@
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-	(url-retrieve-synchronously
-	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	 'silent 'inhibit-cookies)
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
+
+
+;; -------------------------------------  Package setup  ------------------------------------- ;;
+;; Ref: https://stackoverflow.com/questions/67688140/emacs-definition-is-void-use-package
+(require 'package)                   ; Bring in to the environment all package management functions
+
+;; A list of package repositories
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org"   . "https://orgmode.org/elpa/")
+                         ("elpa"  . "https://elpa.gnu.org/packages/")))
+
+(package-initialize)                 ; Initializes the package system and prepares it to be used
+
+(unless package-archive-contents     ; Unless a package archive already exists,
+  (package-refresh-contents))        ; Refresh package contents so that Emacs knows which packages to load
+
+
+;; Initialize use-package on non-linux platforms
+(unless (package-installed-p 'use-package)        ; Unless "use-package" is installed, install "use-package"
+  (package-install 'use-package))
+
+(require 'use-package)                            ; Once it's installed, we load it using require
+
+;; Make sure packages are downloaded and installed before they are run
+;; also frees you from having to put :ensure t after installing EVERY PACKAGE.
+(setq use-package-always-ensure t)
 
 ;; -------------------------------------------------------------------------------------
 ;; ----------------------------    THEME     -------------------------------------------
@@ -97,10 +123,6 @@
 
 ;; refresh buffers when any file change
 (global-auto-revert-mode t)
-
-;; display time
-;; (load "time" t t)
-;; (display-time)
 
 ;; track recently opened file
 (recentf-mode t)
@@ -210,6 +232,8 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("1a1266e25ed97448bbe80f246f53372d4b914d30802711abfda7afcbf2f7b3ec" "859ff6182156e4bea960c2c7678f8b3da23961046b855e805f0f5a5d09b92658" "aa6638f0cd2ba2c68be03220ea73495116dc6f0b625405ede34087c1babb71ae" "76b4632612953d1a8976d983c4fdf5c3af92d216e2f87ce2b0726a1f37606158" "a7760b614d51ba59af9bd4a87014e688cdcb7df36e971e21abc23cc7ad0cdfbc" default))
+ '(flycheck-flake8-maximum-line-length 200)
+ '(flycheck-flake8rc "pyproject.toml")
  '(git-commit-summary-max-length 100)
  '(package-selected-packages
    '(undo-fu silkworm-theme smooth-scroll ## find-file-in-project helm-ag dumb-jump helm)))
@@ -275,16 +299,16 @@
 ;; https://emacs.stackexchange.com/questions/47424/tramp-gcloud-compute-ssh-not-working
 (require 'tramp)
 (add-to-list 'tramp-methods
-	     '("gcssh"
-	      (tramp-login-program        "gcloud compute ssh")
-	      (tramp-login-args           (("%h")))
-	      (tramp-async-args           (("-q")))
-	      (tramp-remote-shell         "/bin/sh")
-	      (tramp-remote-shell-args    ("-c"))
-	      (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
-					   ("-o" "UserKnownHostsFile=/dev/null")
-					   ("-o" "StrictHostKeyChecking=no")))
-	      (tramp-default-port         22)))
+             '("gcssh"
+              (tramp-login-program        "gcloud compute ssh")
+              (tramp-login-args           (("%h")))
+              (tramp-async-args           (("-q")))
+              (tramp-remote-shell         "/bin/sh")
+              (tramp-remote-shell-args    ("-c"))
+              (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+                                           ("-o" "UserKnownHostsFile=/dev/null")
+                                           ("-o" "StrictHostKeyChecking=no")))
+              (tramp-default-port         22)))
 
 (defun ssh-mehmet-docker ()
  (interactive)
@@ -354,14 +378,14 @@
   "Copy thing between beg & end into kill ring."
   (save-excursion
     (let ((beg (get-point begin-of-thing 1))
-	  (end (get-point end-of-thing arg)))
+          (end (get-point end-of-thing arg)))
       (copy-region-as-kill beg end))))
 
 (defun paste-to-mark (&optional arg)
   "Paste things to mark, or to the prompt in shell-mode."
   (unless (eq arg 1)
     (if (string= "shell-mode" major-mode)
-	(comint-next-prompt 25535)
+        (comint-next-prompt 25535)
       (goto-char (mark)))
     (yank)))
 
@@ -392,17 +416,154 @@
      (line-end-position)))
      (message "Copied line"))
 
+(defun projectile-ag-word (&optional arg)
+  (interactive)
+  (copy-word)
+  ;; (projectile-ag)
+  (message "projectile-ag-word"))
+
+;; -------------------------------------  jedi  ------------------------------------- ;;
 ;; Ref: http://tkf.github.io/emacs-jedi/latest/
 (add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:setup-keys t)
 (setq jedi:complete-on-dot t)                 ; optional
+
+;; Ref: https://stackoverflow.com/questions/43550507/configure-jedi-not-to-auto-complete-automatically
+(setq jedi:tooltip-method nil)
+
+
+;; -------------------------------------  python-pytest  ------------------------------------- ;;
+;; https://shahinism.com/en/posts/emacs-python-pytest/
+(use-package python-pytest
+  :after python
+  :custom
+  (python-pytest-arguments
+   '("--color"          ;; colored output in the buffer
+     "--failed-first"   ;; run the previous failed tests first
+     "--pdb"
+     "--maxfail=1"))    ;; exit in 5 continuous failures in a run
+  ;; :config
+  ;; (which-key-declare-prefixes-for-mode 'python-mode "SPC pt" "Testing")
+  ;; (evil-leader/set-key-for-mode 'python-mode
+  ;;   "ptp" 'python-pytest-popup
+  ;;   "ptt" 'python-pytest
+  ;;   ;; "ptf" 'python-pytest-file
+  ;;   ;; "ptF" 'python-pytest-file-dwim
+  ;;   "ptf" 'python-pytest-function
+  ;;   "ptF" 'python-pytest-function-dwim
+  ;;   "ptl" 'python-pytest-last-failed)
+  )
+
+(global-set-key (kbd "<ESC> ptd") 'python-pytest-dispatch)
+(global-set-key (kbd "<ESC> ptm") 'python-pytest-file)
+(global-set-key (kbd "<ESC> ptf") 'python-pytest-function)
+(global-set-key (kbd "<ESC> ptp") 'python-pytest-popup)
+(global-set-key (kbd "<ESC> ptr") 'python-pytest-repeat)
+
+(defun pytest-mehmet ()
+ (interactive)
+ (python-pytest "--pdb"))
+
+
+;; -------------------------------------  flycheck  ------------------------------------- ;;
+;; Ref on configuring syntax checkers:
+;; - https://www.flycheck.org/en/28/_downloads/flycheck.html#Configuring-checkers
+;; - https://www.flycheck.org/en/27/_downloads/flycheck.html
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
+(add-to-list 'flycheck-disabled-checkers 'lsp t)
+(add-to-list 'flycheck-disabled-checkers 'python-pylint t)
+(add-to-list 'flycheck-disabled-checkers 'python-pycompile t)
+
+;; --------------------------------  Python code formatting  -------------------------------- ;;
+;; https://www.reddit.com/r/emacs/comments/supjnb/what_is_your_setup_for_python_coding_in_emacs/
+;; (setenv "PYTHONIOENCODING" "utf8")
+
+;; (setq python-shell-interpreter-args "-m asyncio")
+
+;; (use-package python-black
+;;     :ensure t
+;;     :quelpa
+;;     (python-black
+;;         :fetcher git
+;;         :url "https://github.com/wbolster/emacs-python-black")
+;;     :after python)
+
+;; (use-package python-black
+;;   :demand t
+;;   :after python
+;;   :hook (python-mode . python-black-on-save-mode-enable-dwim))
+
+;; (python-black-on-save-mode t)
+;; (add-hook 'before-save-hook 'python-black-buffer)
+
+;; (use-package py-isort
+;;     :ensure t
+;;     :quelpa
+;;     (py-isort
+;;          :fetcher git
+;;          :url "https://github.com/paetzke/py-isort.el")
+;;     )
+
+;; (use-package lsp-pyright
+;;     :ensure t
+;;     :quelpa
+;;     (lsp-pyright
+;;         :fetcher git
+;;         :url "https://github.com/emacs-lsp/lsp-pyright")
+;;     :hook (python-mode . (lambda () (require 'lsp-pyright)))
+;;     :init (when (executable-find "python3")
+;;               (setq lsp-pyright-python-executable-cmd "python3")))
+
+;; (defun my/python_pay_respects ()
+;;     "Make string to fstring"
+;;     (interactive)
+;;     (when (nth 3 (syntax-ppss))
+;;         (let ((p (point)))
+;;              (goto-char (nth 8 (syntax-ppss)))
+;;              (insert "f")
+;;              (goto-char p)
+;;              (forward-char))))
+
+;; (defun my/python_format ()
+;;     "Format python buffer with isort and black"
+;;     (interactive)
+;;     (py-isort-buffer)
+;;     (python-black-buffer)
+;;     (save-buffer))
+
+;; (add-hook 'python-mode-hook
+;;     (lambda () (local-set-key (kbd "C-c f") 'my/python_pay_respects)))
+
+;; (add-hook 'python-mode-hook
+;;     (lambda () (local-set-key (kbd "C-c r") 'my/python_format)))
 
 (setq sh-basic-offset 2)
 
-(straight-use-package 'dumb-jump)
+;; -------------------------  *** Rename variable across project ***  ------------------------- ;;
+;; I now use helm-ag to find all instances of the function name (searches in all files, incl. subdirs,
+;; not just in open buffers), and then I use C-c C-e to enter a buffer that lists all the matches
+;; and there I change the function name. When I am done I press C-c C-c (helm-ag--edit-commit) to
+;; store the changes to all the opened files. This might sound confusing but please see
+;;
+;; Ref:
+;; - https://emacs.stackexchange.com/questions/7595/how-do-i-refactor-across-a-project-in-emacs-change-method-name-everywhere
+;; - https://github.com/ShingoFukuyama/helm-swoop
+
+;; ------------------------------------  helm-swoop  ----------------------------------- ;;
+(global-set-key (kbd "M-g") 'helm-swoop)
+
+;; When doing isearch, hand the word over to helm-swoop
+(define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
+;; From helm-swoop to helm-multi-swoop-all
+(define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
+
+;; ------------------------------------  Keybindings  ----------------------------------- ;;
 (straight-use-package 'find-file-in-project)
 (straight-use-package 'helm)
 (straight-use-package 'helm-ag)
-
 
 ;; https://github.com/redguardtoo/find-file-in-project
 (require 'find-file-in-project)
@@ -422,53 +583,66 @@
 (global-set-key (kbd "M-s") 'save-buffer)
 (global-set-key (kbd "M-q") 'quit-window)
 (global-set-key (kbd "M-o") 'other-window)
-(global-set-key (kbd "M-n") 'find-file-in-project)
+;; (global-set-key (kbd "M-n") 'find-file-in-project)
+(global-set-key (kbd "M-n") 'helm-projectile-find-file-dwim)
 (global-set-key (kbd "M-f") 'find-file)
-(global-set-key (kbd "M-g") 'helm-ag)
-(global-set-key (kbd "M-i") 'goto-line)
+;; (global-set-key (kbd "M-g") 'helm-ag)
+;; (global-set-key (kbd "M-g") 'helm-projectile-ag)
+(global-set-key (kbd "M-l") 'goto-line)
 (global-set-key (kbd "M-h") 'highlight-symbol)
-;; (global-set-key (kbd "ESC-M-h") 'highlight-symbol-remove-all)
+(global-set-key (kbd "<ESC> M-h") 'highlight-symbol-remove-all)
 ;; (global-set-key (kbd "M-b") 'helm-buffers-list)
-(global-set-key (kbd "M-m") 'helm-mini)
+(global-set-key (kbd "M-m") 'imenu)
 (global-set-key (kbd "M-d") 'delete-window)
+(global-set-key (kbd "M-j") 'jedi:goto-definition)
+(global-set-key (kbd "M-=") 'move-text-line-up)
+(global-set-key (kbd "M--") 'move-text-line-down)
+(global-set-key (kbd "M-+") 'move-text-region-up)
+(global-set-key (kbd "M-_") 'move-text-region-down)
+(global-set-key (kbd "M-f") 'copy-line)
+(global-set-key (kbd "M-c") 'copy-word)
+(global-set-key (kbd "M-a") 'select-word)
+;; (global-set-key (kbd "M-d") 'kill-line)
+(global-set-key (kbd "M-b") 'back-to-indentation)
+(global-set-key (kbd "M-e") 'yank)
+(global-set-key (kbd "M-,") 'beginning-of-defun)
+(global-set-key (kbd "M-.") 'end-of-defun)
+;; (global-set-key (kbd "<prior>") 'beginning-of-defun)
+;; (global-set-key (kbd "<next>") 'end-of-defun)
+(global-set-key (kbd "<home>") 'beginning-of-defun)
+(global-set-key (kbd "<end>") 'end-of-defun)
+(global-set-key (kbd "ESC <up>") 'beginning-of-defun)
+(global-set-key (kbd "ESC <down>") 'end-of-defun)
 
 (global-set-key (kbd "\C-z") 'undo-fu-only-undo)
 (global-set-key (kbd "\C-n") 'undo-fu-only-redo)
 (global-set-key (kbd "\C-p") 'yank)
 (global-set-key (kbd "\C-]") 'yank)
-(global-set-key (kbd "M-e") 'yank)
 ;; (global-set-key (kbd "\C-q") 'keyboard-quit)
 ;; (global-set-key (kbd "\C-h") 'keyboard-escape-quit)
 ;; (global-set-key (kbd "\C-o") 'isearch-yank-kill)
 (global-set-key (kbd "\C-s") 'swiper)
 (global-set-key (kbd "C-_") '
   comment-or-uncomment-region)
+(global-set-key (kbd "C-j") 'jedi:complete)
 
-(global-set-key (kbd "M-j") 'jedi:goto-definition)
+(global-set-key (kbd "M-,") 'highlight-symbol-prev)
+(global-set-key (kbd "M-.") 'highlight-symbol-next)
 
-(global-set-key (kbd "M-=") 'move-text-line-up)
-(global-set-key (kbd "M--") 'move-text-line-down)
-
-(global-set-key (kbd "M-+") 'move-text-region-up)
-(global-set-key (kbd "M-_") 'move-text-region-down)
-
-(global-set-key (kbd "M-l") 'copy-line)
-(global-set-key (kbd "M-f") 'copy-line)
-(global-set-key (kbd "M-c") 'copy-word)
-(global-set-key (kbd "M-a") 'select-word)
+(global-set-key (kbd "M-;") 'iedit-mode)
 
 ;; (global-set-key (kbd "M-.") 'dumb-jump-go)
 ;; (global-set-key (kbd "M-,") 'dumb-jump-back)
 (global-set-key "[1;9A" 'helm-mini) ;; (kbd "M-<up>")
 (global-set-key "[1;9B" 'find-file) ;; (kbd "M-<down>")
 
-(global-set-key "[1;10A" 'dumb-jump-go) ;; (kbd "M-S-<up>")
-(global-set-key "[1;10B" 'dumb-jump-back) ;; (kbd "M-S-<down>")
+;; (global-set-key "[1;10A" 'dumb-jump-go) ;; (kbd "M-S-<up>")
+;; (global-set-key "[1;10B" 'dumb-jump-back) ;; (kbd "M-S-<down>")
+(global-set-key "[1;10A" 'jedi:goto-definition) ;; (kbd "M-S-<up>")
+(global-set-key "[1;10B" 'jedi:goto-definition-pop-marker) ;; (kbd "M-S-<down>")
 
 (global-set-key "[1;10D" 'undo-fu-only-undo) ;; (kbd "M-S-<left>")
 (global-set-key "[1;10C" 'undo-fu-only-redo) ;; (kbd "M-S-<right>")
-
-(global-set-key (kbd "M-b") 'back-to-indentation)
 
 ;; (global-set-key (kbd "M-[") 'left-word)
 ;; (global-set-key (kbd "M-]") 'right-word)
@@ -489,15 +663,10 @@
 ;; (global-set-key (kbd "M-[") 'left-word)
 ;; (global-set-key (kbd "M-]") 'right-word)
 
-;; (global-set-key (kbd "M-f") 'end-of-line)
-;; (global-set-key (kbd "M-b") 'beginning-of-line)
-
-
 ;; (package-install 'flycheck)
 ;; (global-flycheck-mode)
 ;; (package-install 'exec-path-from-shell)
 ;; (exec-path-from-shell-initialize)
-
 
 ;; Move to beginning of line
 ;; Select a word
