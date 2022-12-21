@@ -422,6 +422,12 @@
   ;; (projectile-ag)
   (message "projectile-ag-word"))
 
+(defun helm-ag-word-at-point (&optional arg)
+  (interactive)
+  (let ((helm-ag-insert-at-point 'symbol))
+    (helm-do-ag-project-root))
+  (message "helm-ag-word-at-point"))
+
 ;; -------------------------------------  jedi  ------------------------------------- ;;
 ;; Ref: http://tkf.github.io/emacs-jedi/latest/
 (add-hook 'python-mode-hook 'jedi:setup)
@@ -552,14 +558,6 @@
 ;; - https://emacs.stackexchange.com/questions/7595/how-do-i-refactor-across-a-project-in-emacs-change-method-name-everywhere
 ;; - https://github.com/ShingoFukuyama/helm-swoop
 
-;; ------------------------------------  helm-swoop  ----------------------------------- ;;
-(global-set-key (kbd "M-g") 'helm-swoop)
-
-;; When doing isearch, hand the word over to helm-swoop
-(define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
-;; From helm-swoop to helm-multi-swoop-all
-(define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
-
 ;; ------------------------------------  Keybindings  ----------------------------------- ;;
 (straight-use-package 'find-file-in-project)
 (straight-use-package 'helm)
@@ -588,6 +586,8 @@
 (global-set-key (kbd "M-f") 'find-file)
 ;; (global-set-key (kbd "M-g") 'helm-ag)
 ;; (global-set-key (kbd "M-g") 'helm-projectile-ag)
+;; (global-set-key (kbd "M-g") 'helm-swoop)
+(global-set-key (kbd "M-g") 'helm-ag-word-at-point)
 (global-set-key (kbd "M-l") 'goto-line)
 (global-set-key (kbd "M-h") 'highlight-symbol)
 (global-set-key (kbd "<ESC> M-h") 'highlight-symbol-remove-all)
