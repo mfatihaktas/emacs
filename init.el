@@ -11,9 +11,9 @@
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
+	(url-retrieve-synchronously
+	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	 'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
@@ -25,8 +25,8 @@
 
 ;; A list of package repositories
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org"   . "https://orgmode.org/elpa/")
-                         ("elpa"  . "https://elpa.gnu.org/packages/")))
+			 ("org"   . "https://orgmode.org/elpa/")
+			 ("elpa"  . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)                 ; Initializes the package system and prepares it to be used
 
@@ -48,8 +48,8 @@
 ;; ----------------------------    THEME     -------------------------------------------
 ;; -------------------------------------------------------------------------------------
 ;; (load-theme 'wombat)
-(load-theme 'spacemacs-light t)
-;; (load-theme 'spacemacs-dark t)
+;; (load-theme 'spacemacs-light t)
+(load-theme 'spacemacs-dark t)
 ;; (load-theme 'zenburn t)
 ;; (load-theme 'twilight-bright)
 ;; (load-theme 'autumn-light)
@@ -236,7 +236,8 @@
  '(flycheck-flake8rc "pyproject.toml")
  '(git-commit-summary-max-length 100)
  '(package-selected-packages
-   '(undo-fu silkworm-theme smooth-scroll ## find-file-in-project helm-ag dumb-jump helm)))
+   '(undo-fu silkworm-theme smooth-scroll ## find-file-in-project helm-ag dumb-jump helm))
+ '(warning-suppress-types '((magit))))
 
 ;; (load-theme 'silkworm)
 
@@ -287,28 +288,41 @@
   (find-file "/ssh:mehmet@console.sb4.orbit-lab.org|ssh:root@node1-5:/root/edge-load-balance"))
 
 (require 'tramp)
-(setq tramp-default-method "ssh")
+(setq tramp-default-method "sshx")
+(setq tramp-local-host-regexp nil)
+
+(add-to-list 'tramp-connection-properties
+	     (list (regexp-quote "/sshx:user@host:")
+		   "remote-shell" "/bin/bash"))
+
 ;; (setq tramp-verbose 8)
 ;; (add-to-list 'tramp-default-proxies-alist
 ;;              '("ORBIT" nil "/ssh:mehmet@console.sb1.orbit-lab.org:"))
 
+;; (defun ssh-amarel ()
+;;   (interactive)
+;;   (find-file "/ssh:mehmet@console.sb1.orbit-lab.org|ssh:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
+
+;; Note: Notice `sshx`!
+;; Ref:
+;; - https://www.bounga.org/tips/2017/11/30/fix-emacs-tramp-lag-and-timeout/
+;; - https://www.reddit.com/r/emacs/comments/uxqafc/has_tramp_ever_work_for_you_flawlessly/
 (defun ssh-amarel ()
   (interactive)
-  (find-file "/ssh:mehmet@console.sb1.orbit-lab.org|ssh:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
+  (find-file "/sshx:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
 
 ;; https://emacs.stackexchange.com/questions/47424/tramp-gcloud-compute-ssh-not-working
-(require 'tramp)
 (add-to-list 'tramp-methods
-             '("gcssh"
-              (tramp-login-program        "gcloud compute ssh")
-              (tramp-login-args           (("%h")))
-              (tramp-async-args           (("-q")))
-              (tramp-remote-shell         "/bin/sh")
-              (tramp-remote-shell-args    ("-c"))
-              (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
-                                           ("-o" "UserKnownHostsFile=/dev/null")
-                                           ("-o" "StrictHostKeyChecking=no")))
-              (tramp-default-port         22)))
+	     '("gcssh"
+	      (tramp-login-program        "gcloud compute ssh")
+	      (tramp-login-args           (("%h")))
+	      (tramp-async-args           (("-q")))
+	      (tramp-remote-shell         "/bin/sh")
+	      (tramp-remote-shell-args    ("-c"))
+	      (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+					   ("-o" "UserKnownHostsFile=/dev/null")
+					   ("-o" "StrictHostKeyChecking=no")))
+	      (tramp-default-port         22)))
 
 (defun ssh-mehmet-docker ()
  (interactive)
@@ -378,14 +392,14 @@
   "Copy thing between beg & end into kill ring."
   (save-excursion
     (let ((beg (get-point begin-of-thing 1))
-          (end (get-point end-of-thing arg)))
+	  (end (get-point end-of-thing arg)))
       (copy-region-as-kill beg end))))
 
 (defun paste-to-mark (&optional arg)
   "Paste things to mark, or to the prompt in shell-mode."
   (unless (eq arg 1)
     (if (string= "shell-mode" major-mode)
-        (comint-next-prompt 25535)
+	(comint-next-prompt 25535)
       (goto-char (mark)))
     (yank)))
 
@@ -557,6 +571,32 @@
 ;; Ref:
 ;; - https://emacs.stackexchange.com/questions/7595/how-do-i-refactor-across-a-project-in-emacs-change-method-name-everywhere
 ;; - https://github.com/ShingoFukuyama/helm-swoop
+
+
+;; ------------------------------------  Window splitting  ----------------------------------- ;;
+;; Prefer to split window vertically:
+;; Ref: https://stackoverflow.com/questions/23659909/reverse-evaluation-order-of-split-height-threshold-and-split-width-threshold-in
+(defun my-split-window-sensibly (&optional window)
+  (let ((window (or window (selected-window))))
+    (or (and (window-splittable-p window t)
+	     ;; Split window horizontally.
+	     (with-selected-window window
+	       (split-window-right)))
+	(and (window-splittable-p window)
+	     ;; Split window vertically.
+	     (with-selected-window window
+	       (split-window-below)))
+	(and (eq window (frame-root-window (window-frame window)))
+	     (not (window-minibuffer-p window))
+	     ;; If WINDOW is the only window on its frame and is not the
+	     ;; minibuffer window, try to split it horizontally disregarding
+	     ;; the value of `split-width-threshold'.
+	     (let ((split-width-threshold 0))
+	       (when (window-splittable-p window t)
+		 (with-selected-window window
+		   (split-window-right))))))))
+
+(setq split-window-preferred-function 'my-split-window-sensibly)
 
 ;; ------------------------------------  Keybindings  ----------------------------------- ;;
 (straight-use-package 'find-file-in-project)
