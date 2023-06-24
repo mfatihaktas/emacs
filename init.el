@@ -11,9 +11,9 @@
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-	(url-retrieve-synchronously
-	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	 'silent 'inhibit-cookies)
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
@@ -25,8 +25,8 @@
 
 ;; A list of package repositories
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-			 ("org"   . "https://orgmode.org/elpa/")
-			 ("elpa"  . "https://elpa.gnu.org/packages/")))
+                         ("org"   . "https://orgmode.org/elpa/")
+                         ("elpa"  . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)                 ; Initializes the package system and prepares it to be used
 
@@ -48,8 +48,8 @@
 ;; ----------------------------    THEME     -------------------------------------------
 ;; -------------------------------------------------------------------------------------
 ;; (load-theme 'wombat)
-;; (load-theme 'spacemacs-light t)
-(load-theme 'spacemacs-dark t)
+(load-theme 'spacemacs-light t)
+;; (load-theme 'spacemacs-dark t)
 ;; (load-theme 'zenburn t)
 ;; (load-theme 'twilight-bright)
 ;; (load-theme 'autumn-light)
@@ -125,7 +125,7 @@
 (global-auto-revert-mode t)
 
 ;; track recently opened file
-(recentf-mode t)
+;; (recentf-mode t)  ;; Caused "Method ‘ghcs’ is not known." error on Mac with Intel.
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 (setq recentf-max-saved-items 1000)
 (setq recentf-max-menu-items 50)
@@ -235,9 +235,14 @@
  '(flycheck-flake8-maximum-line-length 200)
  '(flycheck-flake8rc "pyproject.toml")
  '(git-commit-summary-max-length 100)
+ '(highlight-symbol-colors
+   '("DeepPink" "cyan" "DarkRed" "DarkBlue" "tomato" "magenta1"))
+ '(minimap-minimum-width 30)
+ '(minimap-mode t)
  '(package-selected-packages
    '(undo-fu silkworm-theme smooth-scroll ## find-file-in-project helm-ag dumb-jump helm))
- '(warning-suppress-types '((magit))))
+ '(warning-suppress-log-types '((emacs) (magit) (magit)))
+ '(warning-suppress-types '((magit) (magit))))
 
 ;; (load-theme 'silkworm)
 
@@ -253,11 +258,7 @@
 (load "highlight-symbol") ;; best not to include the ending “.el” or “.elc”
 (load "move-text")
 
-;; (custom-set-variables
-;;  '(highlight-symbol-colors
-;;    (quote
-;;     ("DeepPink" "cyan" "DarkRed" "DarkBlue" "tomato" "magenta1" )))
-;;  )
+
 
 (defun reload-dotemacs ()
   (interactive)
@@ -292,8 +293,8 @@
 (setq tramp-local-host-regexp nil)
 
 (add-to-list 'tramp-connection-properties
-	     (list (regexp-quote "/sshx:user@host:")
-		   "remote-shell" "/bin/bash"))
+             (list (regexp-quote "/sshx:user@host:")
+                   "remote-shell" "/bin/bash"))
 
 ;; (setq tramp-verbose 8)
 ;; (add-to-list 'tramp-default-proxies-alist
@@ -309,20 +310,23 @@
 ;; - https://www.reddit.com/r/emacs/comments/uxqafc/has_tramp_ever_work_for_you_flawlessly/
 (defun ssh-amarel ()
   (interactive)
+  (find-file "/ssh:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
+(defun sshx-amarel ()
+  (interactive)
   (find-file "/sshx:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
 
 ;; https://emacs.stackexchange.com/questions/47424/tramp-gcloud-compute-ssh-not-working
 (add-to-list 'tramp-methods
-	     '("gcssh"
-	      (tramp-login-program        "gcloud compute ssh")
-	      (tramp-login-args           (("%h")))
-	      (tramp-async-args           (("-q")))
-	      (tramp-remote-shell         "/bin/sh")
-	      (tramp-remote-shell-args    ("-c"))
-	      (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
-					   ("-o" "UserKnownHostsFile=/dev/null")
-					   ("-o" "StrictHostKeyChecking=no")))
-	      (tramp-default-port         22)))
+             '("gcssh"
+              (tramp-login-program        "gcloud compute ssh")
+              (tramp-login-args           (("%h")))
+              (tramp-async-args           (("-q")))
+              (tramp-remote-shell         "/bin/sh")
+              (tramp-remote-shell-args    ("-c"))
+              (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+                                           ("-o" "UserKnownHostsFile=/dev/null")
+                                           ("-o" "StrictHostKeyChecking=no")))
+              (tramp-default-port         22)))
 
 (defun ssh-mehmet-docker ()
  (interactive)
@@ -350,7 +354,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(minimap-font-face ((t (:height 10 :family "DejaVu Sans Mono")))))
 
 ;; indentation
 ;; Note: setq-default does not work for some reason
@@ -392,14 +396,14 @@
   "Copy thing between beg & end into kill ring."
   (save-excursion
     (let ((beg (get-point begin-of-thing 1))
-	  (end (get-point end-of-thing arg)))
+          (end (get-point end-of-thing arg)))
       (copy-region-as-kill beg end))))
 
 (defun paste-to-mark (&optional arg)
   "Paste things to mark, or to the prompt in shell-mode."
   (unless (eq arg 1)
     (if (string= "shell-mode" major-mode)
-	(comint-next-prompt 25535)
+        (comint-next-prompt 25535)
       (goto-char (mark)))
     (yank)))
 
@@ -451,6 +455,27 @@
 ;; Ref: https://stackoverflow.com/questions/43550507/configure-jedi-not-to-auto-complete-automatically
 (setq jedi:tooltip-method nil)
 
+;; Ref: https://github.com/tkf/emacs-jedi/issues/154#issuecomment-38357854
+;; (setq jedi:environment-root (quote "/opt/conda/lib/python3.10"))
+;; (setq jedi:environment-root (quote "/Users/mehmet/Desktop/emacs-jedi-hack"))
+;; (setq jedi:environment-root (quote "/workspaces/fw-prototype"))
+;; (setq jedi:environment-root
+;;       (list (shell-command-to-string "which python")))
+
+;; (setq jedi:server-args
+;;       '("--sys-path" "/opt/conda/lib/python3.10/site-packages"
+;;	;; "--sys-path" "ROOT_DIR_2/envs/NAME_2/.../site-packages"
+;;	;; ... and more! ...
+;;	))
+
+;; (setq jedi:server-args
+;;       '("--virtual-env" "/opt/conda/lib/python3.10"
+;;	))
+
+;; set the correct virtualenv path (current one)
+;; (setq jedi:environment-virtualenv
+;;       (list (shell-command-to-string "which python")))
+
 
 ;; -------------------------------------  python-pytest  ------------------------------------- ;;
 ;; https://shahinism.com/en/posts/emacs-python-pytest/
@@ -484,6 +509,11 @@
  (interactive)
  (python-pytest "--pdb"))
 
+
+;; Ref: https://github.com/wbolster/emacs-python-pytest#configuration
+(use-package python-pytest
+ :custom
+ (python-pytest-executable "/opt/conda/bin/python -m pytest"))
 
 ;; -------------------------------------  flycheck  ------------------------------------- ;;
 ;; Ref on configuring syntax checkers:
@@ -572,6 +602,13 @@
 ;; - https://emacs.stackexchange.com/questions/7595/how-do-i-refactor-across-a-project-in-emacs-change-method-name-everywhere
 ;; - https://github.com/ShingoFukuyama/helm-swoop
 
+;; ------------------------------------  Leetcode  ----------------------------------- ;;
+;; (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp/leetcode"))
+
+;; (use-package leetcode
+;;     :config
+;;     (setq leetcode-language "python")
+;; )
 
 ;; ------------------------------------  Window splitting  ----------------------------------- ;;
 ;; Prefer to split window vertically:
@@ -579,24 +616,65 @@
 (defun my-split-window-sensibly (&optional window)
   (let ((window (or window (selected-window))))
     (or (and (window-splittable-p window t)
-	     ;; Split window horizontally.
-	     (with-selected-window window
-	       (split-window-right)))
-	(and (window-splittable-p window)
-	     ;; Split window vertically.
-	     (with-selected-window window
-	       (split-window-below)))
-	(and (eq window (frame-root-window (window-frame window)))
-	     (not (window-minibuffer-p window))
-	     ;; If WINDOW is the only window on its frame and is not the
-	     ;; minibuffer window, try to split it horizontally disregarding
-	     ;; the value of `split-width-threshold'.
-	     (let ((split-width-threshold 0))
-	       (when (window-splittable-p window t)
-		 (with-selected-window window
-		   (split-window-right))))))))
+             ;; Split window horizontally.
+             (with-selected-window window
+               (split-window-right)))
+        (and (window-splittable-p window)
+             ;; Split window vertically.
+             (with-selected-window window
+               (split-window-below)))
+        (and (eq window (frame-root-window (window-frame window)))
+             (not (window-minibuffer-p window))
+             ;; If WINDOW is the only window on its frame and is not the
+             ;; minibuffer window, try to split it horizontally disregarding
+             ;; the value of `split-width-threshold'.
+             (let ((split-width-threshold 0))
+               (when (window-splittable-p window t)
+                 (with-selected-window window
+                   (split-window-right))))))))
 
 (setq split-window-preferred-function 'my-split-window-sensibly)
+
+;; ------------------------------------  Reload file  ----------------------------------- ;;
+;; Source: https://www.emacswiki.org/emacs/misc-cmds.el
+(defun revert-buffer-no-confirm ()
+  "Revert buffer without confirmation."
+  (interactive)
+  (revert-buffer :ignore-auto :noconfirm))
+
+;; ------------------------------------  Codespaces  ----------------------------------- ;;
+;; Ref: https://github.com/patrickt/codespaces.el
+(use-package codespaces
+  :config (codespaces-setup)
+  :bind ("C-c S" . #'codespaces-connect))
+
+(setq vc-handled-backends '(Git))
+
+;; ------------------------------------  Copilot  ----------------------------------- ;;
+;; (use-package copilot
+;;   :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
+;;   :ensure t)
+;; ;; you can utilize :map :hook and :config to customize copilotc
+
+;; ;; Option 1: Use copilot-mode to automatically provide completions
+;; ;; (load bootstrap-file nil 'nomessage))(add-hook 'prog-mode-hook 'copilot-mode)
+;; (add-hook 'prog-mode-hook 'copilot-mode)
+
+;; ;; Option 2: Manually provide completions
+;; ;; You need to bind copilot-complete to some key and call copilot-clear-overlay inside post-command-hook.
+
+;; (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+;; (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+
+;; Ref: https://github.com/zerolfx/copilot.el#2-configure-completion
+
+;; ------------------------------------  ChatGPT  ----------------------------------- ;;
+(use-package chatgpt
+  :straight (:host github :repo "joshcho/ChatGPT.el" :files ("dist" "*.el"))
+  :init
+  (require 'python)
+  (setq chatgpt-repo-path "~/.emacs.d/straight/repos/ChatGPT.el/")
+  :bind ("C-c q" . chatgpt-query))
 
 ;; ------------------------------------  Keybindings  ----------------------------------- ;;
 (straight-use-package 'find-file-in-project)
@@ -647,6 +725,7 @@
 (global-set-key (kbd "M-e") 'yank)
 (global-set-key (kbd "M-,") 'beginning-of-defun)
 (global-set-key (kbd "M-.") 'end-of-defun)
+(global-set-key (kbd "M-r") 'revert-buffer-no-confirm)
 ;; (global-set-key (kbd "<prior>") 'beginning-of-defun)
 ;; (global-set-key (kbd "<next>") 'end-of-defun)
 (global-set-key (kbd "<home>") 'beginning-of-defun)
