@@ -669,12 +669,81 @@
 ;; Ref: https://github.com/zerolfx/copilot.el#2-configure-completion
 
 ;; ------------------------------------  ChatGPT  ----------------------------------- ;;
-(use-package chatgpt
-  :straight (:host github :repo "joshcho/ChatGPT.el" :files ("dist" "*.el"))
-  :init
-  (require 'python)
-  (setq chatgpt-repo-path "~/.emacs.d/straight/repos/ChatGPT.el/")
-  :bind ("C-c q" . chatgpt-query))
+;; (use-package chatgpt
+;;   :straight (:host github :repo "joshcho/ChatGPT.el" :files ("dist" "*.el"))
+;;   :init
+;;   (require 'python)
+;;   (setq chatgpt-repo-path "~/.emacs.d/straight/repos/ChatGPT.el/")
+;;   :bind ("C-c q" . chatgpt-query))
+
+;; ------------------------------  scroll-up/down-half  ----------------------------- ;;
+(defun scroll-up-half ()
+  (interactive)
+  (scroll-down-command
+   (floor
+    (- (window-height)
+       next-screen-context-lines)
+    2)))
+
+(defun scroll-down-half ()
+  (interactive)
+  (scroll-up-command
+   (floor
+    (- (window-height)
+       next-screen-context-lines)
+    2)))
+
+;; Ref: https://www.reddit.com/r/emacs/comments/r7l3ar/how_do_you_scroll_half_a_page/
+(defun my-scroll-down-half-page ()
+  ;; "scroll down half a page while keeping the cursor centered"
+  (interactive)
+  (let ((ln (line-number-at-pos (point)))
+    (lmax (line-number-at-pos (point-max))))
+    (cond ((= ln 1) (move-to-window-line nil))
+      ((= ln lmax) (recenter (window-end)))
+      (t (progn
+           (move-to-window-line -1)
+           (recenter))))))
+
+(defun my-scroll-up-half-page ()
+  ;; "scroll up half a page while keeping the cursor centered"
+  (interactive)
+  (let ((ln (line-number-at-pos (point)))
+    (lmax (line-number-at-pos (point-max))))
+    (cond ((= ln 1) nil)
+      ((= ln lmax) (move-to-window-line nil))
+      (t (progn
+           (move-to-window-line 0)
+           (recenter))))))
+
+;; ------------------------------------  auto-highlight-symbol  ----------------------------------- ;;
+;; (require 'auto-highlight-symbol)
+;; (global-auto-highlight-symbol-mode)
+;; ;; (define-key auto-highlight-symbol-mode-map (kbd "M-p") 'ahs-backward)
+;; ;; (define-key auto-highlight-symbol-mode-map (kbd "M-n") 'ahs-forward)
+;; (setq ahs-idle-interval 0.2)  ;; if you want instant highlighting, set it to 0, but I find it annoying
+;; (setq ahs-default-range 'ahs-range-whole-buffer)  ;; highlight every occurence in buffer
+
+;; inhibits highlighting in specific places, like in comments
+;; (setq ahs-inhibit-face-list '(font-lock-comment-delimiter-face
+;;				font-lock-comment-face
+;;				font-lock-doc-face
+;;				font-lock-doc-string-face
+;;				font-lock-string-face))
+
+
+(setq highlight-symbol-idle-delay 0.2)
+(add-hook 'prog-mode-hook 'highlight-symbol-mode)
+
+;; https://www.raebear.net/computers/emacs-colors/
+(set-face-attribute 'highlight-symbol-face nil
+                    :background "lavender"
+                    :foreground "dark salmon")
+
+(setq highlight-symbol-colors
+      '("yellow" "peach puff" "gray" "cornflower blue"
+        "deep sky blue" "DarkTurquoise" "khaki" "indian red"
+        "OliveDrab3" "LightYellow3" "salmon1" "tomato1"))
 
 ;; ------------------------------------  Keybindings  ----------------------------------- ;;
 (straight-use-package 'find-file-in-project)
@@ -710,7 +779,6 @@
 (global-set-key (kbd "M-h") 'highlight-symbol)
 (global-set-key (kbd "<ESC> M-h") 'highlight-symbol-remove-all)
 ;; (global-set-key (kbd "M-b") 'helm-buffers-list)
-(global-set-key (kbd "M-m") 'imenu)
 (global-set-key (kbd "M-d") 'delete-window)
 (global-set-key (kbd "M-j") 'jedi:goto-definition)
 (global-set-key (kbd "M-=") 'move-text-line-up)
@@ -732,6 +800,10 @@
 (global-set-key (kbd "<end>") 'end-of-defun)
 (global-set-key (kbd "ESC <up>") 'beginning-of-defun)
 (global-set-key (kbd "ESC <down>") 'end-of-defun)
+;; (global-set-key (kbd "ESC <left>") 'scroll-up-half)
+;; (global-set-key (kbd "ESC <right>") 'scroll-down-half)
+(global-set-key (kbd "ESC <left>") 'my-scroll-up-half-page)
+(global-set-key (kbd "ESC <right>") 'my-scroll-down-half-page)
 
 (global-set-key (kbd "\C-z") 'undo-fu-only-undo)
 (global-set-key (kbd "\C-n") 'undo-fu-only-redo)
@@ -762,6 +834,9 @@
 
 (global-set-key "[1;10D" 'undo-fu-only-undo) ;; (kbd "M-S-<left>")
 (global-set-key "[1;10C" 'undo-fu-only-redo) ;; (kbd "M-S-<right>")
+
+;; (global-set-key (kbd "C-m") 'imenu)
+(global-set-key (kbd "M-m") 'magit-status)
 
 ;; (global-set-key (kbd "M-[") 'left-word)
 ;; (global-set-key (kbd "M-]") 'right-word)
