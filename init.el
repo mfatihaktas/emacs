@@ -11,9 +11,9 @@
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
+	(url-retrieve-synchronously
+	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	 'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
@@ -25,8 +25,8 @@
 
 ;; A list of package repositories
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org"   . "https://orgmode.org/elpa/")
-                         ("elpa"  . "https://elpa.gnu.org/packages/")))
+			 ("org"   . "https://orgmode.org/elpa/")
+			 ("elpa"  . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)                 ; Initializes the package system and prepares it to be used
 
@@ -123,6 +123,8 @@
 
 ;; refresh buffers when any file change
 (global-auto-revert-mode t)
+;; Ref: https://emacs.stackexchange.com/questions/9338/auto-refresh-files-when-using-tramp
+;; (auto-revert-remote-files t)
 
 ;; track recently opened file
 ;; (recentf-mode t)  ;; Caused "Method ‘ghcs’ is not known." error on Mac with Intel.
@@ -230,13 +232,12 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(auto-revert-remote-files t)
  '(custom-safe-themes
    '("1a1266e25ed97448bbe80f246f53372d4b914d30802711abfda7afcbf2f7b3ec" "859ff6182156e4bea960c2c7678f8b3da23961046b855e805f0f5a5d09b92658" "aa6638f0cd2ba2c68be03220ea73495116dc6f0b625405ede34087c1babb71ae" "76b4632612953d1a8976d983c4fdf5c3af92d216e2f87ce2b0726a1f37606158" "a7760b614d51ba59af9bd4a87014e688cdcb7df36e971e21abc23cc7ad0cdfbc" default))
  '(flycheck-flake8-maximum-line-length 200)
- '(flycheck-flake8rc "pyproject.toml")
+ ;; '(flycheck-flake8rc "pyproject.toml")
  '(git-commit-summary-max-length 100)
- '(highlight-symbol-colors
-   '("DeepPink" "cyan" "DarkRed" "DarkBlue" "tomato" "magenta1"))
  '(minimap-minimum-width 30)
  '(minimap-mode t)
  '(package-selected-packages
@@ -249,6 +250,10 @@
 ;; (projectile-global-mode)
 ;; (setq projectile-enable-caching t)
 
+;; Added to speed up TRAMP
+;; Ref: https://emacs.stackexchange.com/questions/17543/tramp-mode-is-much-slower-than-using-terminal-to-ssh
+(setq projectile-mode-line "Projectile")
+
 ;; (setq x-select-enable-clipboard t)
 ;; (setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
 
@@ -257,7 +262,6 @@
 ;; load the packaged named xyz.
 (load "highlight-symbol") ;; best not to include the ending “.el” or “.elc”
 (load "move-text")
-
 
 
 (defun reload-dotemacs ()
@@ -291,18 +295,29 @@
 (require 'tramp)
 (setq tramp-default-method "sshx")
 (setq tramp-local-host-regexp nil)
+;; (setq explicit-shell-file-name "/bin/bash")
+;; (setq tramp-default-remote-shell "/bin/bash")
 
 (add-to-list 'tramp-connection-properties
-             (list (regexp-quote "/sshx:user@host:")
-                   "remote-shell" "/bin/bash"))
+	  (list (regexp-quote "/sshx:user@host:")
+		"remote-shell" "/bin/bash"))
 
-;; (setq tramp-verbose 8)
-;; (add-to-list 'tramp-default-proxies-alist
-;;              '("ORBIT" nil "/ssh:mehmet@console.sb1.orbit-lab.org:"))
+;; (add-to-list 'tramp-connection-properties
+;;	  (list (regexp-quote "/sshx:user@host:")
+;;		"remote-shell" "/usr/bin/zsh"))
 
-;; (defun ssh-amarel ()
-;;   (interactive)
-;;   (find-file "/ssh:mehmet@console.sb1.orbit-lab.org|ssh:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
+;; ;; https://emacs.stackexchange.com/questions/47424/tramp-gcloud-compute-ssh-not-working
+;; (add-to-list 'tramp-methods
+;;           '("gcssh"
+;;            (tramp-login-program        "gcloud compute ssh")
+;;            (tramp-login-args           (("%h")))
+;;            (tramp-async-args           (("-q")))
+;;            (tramp-remote-shell         "/bin/sh")
+;;            (tramp-remote-shell-args    ("-c"))
+;;            (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+;;                                         ("-o" "UserKnownHostsFile=/dev/null")
+;;                                         ("-o" "StrictHostKeyChecking=no")))
+;;            (tramp-default-port         22)))
 
 ;; Note: Notice `sshx`!
 ;; Ref:
@@ -310,23 +325,7 @@
 ;; - https://www.reddit.com/r/emacs/comments/uxqafc/has_tramp_ever_work_for_you_flawlessly/
 (defun ssh-amarel ()
   (interactive)
-  (find-file "/ssh:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
-(defun sshx-amarel ()
-  (interactive)
   (find-file "/sshx:mfa51@amarel.hpc.rutgers.edu:/home/mfa51"))
-
-;; https://emacs.stackexchange.com/questions/47424/tramp-gcloud-compute-ssh-not-working
-(add-to-list 'tramp-methods
-             '("gcssh"
-              (tramp-login-program        "gcloud compute ssh")
-              (tramp-login-args           (("%h")))
-              (tramp-async-args           (("-q")))
-              (tramp-remote-shell         "/bin/sh")
-              (tramp-remote-shell-args    ("-c"))
-              (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
-                                           ("-o" "UserKnownHostsFile=/dev/null")
-                                           ("-o" "StrictHostKeyChecking=no")))
-              (tramp-default-port         22)))
 
 (defun ssh-mehmet-docker ()
  (interactive)
@@ -396,14 +395,14 @@
   "Copy thing between beg & end into kill ring."
   (save-excursion
     (let ((beg (get-point begin-of-thing 1))
-          (end (get-point end-of-thing arg)))
+	  (end (get-point end-of-thing arg)))
       (copy-region-as-kill beg end))))
 
 (defun paste-to-mark (&optional arg)
   "Paste things to mark, or to the prompt in shell-mode."
   (unless (eq arg 1)
     (if (string= "shell-mode" major-mode)
-        (comint-next-prompt 25535)
+	(comint-next-prompt 25535)
       (goto-char (mark)))
     (yank)))
 
@@ -511,9 +510,17 @@
 
 
 ;; Ref: https://github.com/wbolster/emacs-python-pytest#configuration
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "/opt/conda/bin/python -m pytest"))
+
 (use-package python-pytest
  :custom
- (python-pytest-executable "/opt/conda/bin/python -m pytest"))
+ (python-pytest-executable "pytest --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m flink --showlocals --capture=no"))
 
 ;; -------------------------------------  flycheck  ------------------------------------- ;;
 ;; Ref on configuring syntax checkers:
@@ -616,22 +623,22 @@
 (defun my-split-window-sensibly (&optional window)
   (let ((window (or window (selected-window))))
     (or (and (window-splittable-p window t)
-             ;; Split window horizontally.
-             (with-selected-window window
-               (split-window-right)))
-        (and (window-splittable-p window)
-             ;; Split window vertically.
-             (with-selected-window window
-               (split-window-below)))
-        (and (eq window (frame-root-window (window-frame window)))
-             (not (window-minibuffer-p window))
-             ;; If WINDOW is the only window on its frame and is not the
-             ;; minibuffer window, try to split it horizontally disregarding
-             ;; the value of `split-width-threshold'.
-             (let ((split-width-threshold 0))
-               (when (window-splittable-p window t)
-                 (with-selected-window window
-                   (split-window-right))))))))
+	     ;; Split window horizontally.
+	     (with-selected-window window
+	       (split-window-right)))
+	(and (window-splittable-p window)
+	     ;; Split window vertically.
+	     (with-selected-window window
+	       (split-window-below)))
+	(and (eq window (frame-root-window (window-frame window)))
+	     (not (window-minibuffer-p window))
+	     ;; If WINDOW is the only window on its frame and is not the
+	     ;; minibuffer window, try to split it horizontally disregarding
+	     ;; the value of `split-width-threshold'.
+	     (let ((split-width-threshold 0))
+	       (when (window-splittable-p window t)
+		 (with-selected-window window
+		   (split-window-right))))))))
 
 (setq split-window-preferred-function 'my-split-window-sensibly)
 
@@ -702,8 +709,8 @@
     (cond ((= ln 1) (move-to-window-line nil))
       ((= ln lmax) (recenter (window-end)))
       (t (progn
-           (move-to-window-line -1)
-           (recenter))))))
+	   (move-to-window-line -1)
+	   (recenter))))))
 
 (defun my-scroll-up-half-page ()
   ;; "scroll up half a page while keeping the cursor centered"
@@ -713,8 +720,8 @@
     (cond ((= ln 1) nil)
       ((= ln lmax) (move-to-window-line nil))
       (t (progn
-           (move-to-window-line 0)
-           (recenter))))))
+	   (move-to-window-line 0)
+	   (recenter))))))
 
 ;; ------------------------------------  auto-highlight-symbol  ----------------------------------- ;;
 ;; (require 'auto-highlight-symbol)
@@ -732,18 +739,30 @@
 ;;				font-lock-string-face))
 
 
-(setq highlight-symbol-idle-delay 0.2)
+(setq highlight-symbol-idle-delay 1)
 (add-hook 'prog-mode-hook 'highlight-symbol-mode)
 
 ;; https://www.raebear.net/computers/emacs-colors/
+;; (set-face-attribute 'highlight-symbol-face nil
+;;                     :background "lavender"
+;;                     :foreground "dark salmon")
+
 (set-face-attribute 'highlight-symbol-face nil
-                    :background "lavender"
-                    :foreground "dark salmon")
+		    :background "lavender"
+		    :foreground "black")
 
 (setq highlight-symbol-colors
       '("yellow" "peach puff" "gray" "cornflower blue"
-        "deep sky blue" "DarkTurquoise" "khaki" "indian red"
-        "OliveDrab3" "LightYellow3" "salmon1" "tomato1"))
+	"deep sky blue" "DarkTurquoise" "khaki" "indian red"
+	"OliveDrab3" "LightYellow3" "salmon1" "tomato1"))
+
+;; ------------------------------------  AUXTeX  ----------------------------------- ;;
+;; https://www.gnu.org/software/auctex/manual/auctex/auctex_toc.html#SEC_Contents
+(use-package tex
+  :ensure auctex)
+
+;; ------------------------------------  Pandoc  ----------------------------------- ;;
+(straight-use-package 'pandoc)
 
 ;; ------------------------------------  Keybindings  ----------------------------------- ;;
 (straight-use-package 'find-file-in-project)
@@ -815,7 +834,7 @@
 (global-set-key (kbd "\C-s") 'swiper)
 (global-set-key (kbd "C-_") '
   comment-or-uncomment-region)
-(global-set-key (kbd "C-j") 'jedi:complete)
+(global-set-key (kbd "M-j") 'jedi:complete)
 
 (global-set-key (kbd "M-,") 'highlight-symbol-prev)
 (global-set-key (kbd "M-.") 'highlight-symbol-next)
@@ -869,3 +888,8 @@
 
 ;; (setq x-select-enable-clipboard nil)
 ;; (setq x-select-enable-primary nil)
+
+
+;; Necessary for `sshx-amarel` command to work, and yes,
+;; it needs to be placed at the end!
+;; (setq tramp-shell-prompt-pattern "$")
