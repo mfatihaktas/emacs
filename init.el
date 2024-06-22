@@ -514,13 +514,73 @@
 ;;  :custom
 ;;  (python-pytest-executable "/opt/conda/bin/python -m pytest"))
 
-(use-package python-pytest
- :custom
- (python-pytest-executable "pytest --showlocals --capture=no"))
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "python -m pytest"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m bigquery --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m clickhouse --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m dask --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m duckdb --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m exasol --showlocals --capture=no"))
 
 ;; (use-package python-pytest
 ;;  :custom
 ;;  (python-pytest-executable "pytest -m flink --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m mssql --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m mysql --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m oracle --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m pandas --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m polars --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m postgres --showlocals --capture=no"))
+
+(use-package python-pytest
+ :custom
+ (python-pytest-executable "pytest -m pyspark --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m sqlite --showlocals --capture=no"))
+
+;; (use-package python-pytest
+;;  :custom
+;;  (python-pytest-executable "pytest -m trino --showlocals --capture=no"))
 
 ;; -------------------------------------  flycheck  ------------------------------------- ;;
 ;; Ref on configuring syntax checkers:
@@ -794,12 +854,14 @@
 ;; (global-set-key (kbd "M-g") 'helm-projectile-ag)
 ;; (global-set-key (kbd "M-g") 'helm-swoop)
 (global-set-key (kbd "M-g") 'helm-ag-word-at-point)
+(global-set-key (kbd "M-j") 'helm-ag-word-at-point)
+(global-set-key (kbd "M-'") 'keyboard-quit)
 (global-set-key (kbd "M-l") 'goto-line)
 (global-set-key (kbd "M-h") 'highlight-symbol)
 (global-set-key (kbd "<ESC> M-h") 'highlight-symbol-remove-all)
 ;; (global-set-key (kbd "M-b") 'helm-buffers-list)
 (global-set-key (kbd "M-d") 'delete-window)
-(global-set-key (kbd "M-j") 'jedi:goto-definition)
+;; (global-set-key (kbd "M-j") 'jedi:goto-definition)
 (global-set-key (kbd "M-=") 'move-text-line-up)
 (global-set-key (kbd "M--") 'move-text-line-down)
 (global-set-key (kbd "M-+") 'move-text-region-up)
@@ -834,7 +896,7 @@
 (global-set-key (kbd "\C-s") 'swiper)
 (global-set-key (kbd "C-_") '
   comment-or-uncomment-region)
-(global-set-key (kbd "M-j") 'jedi:complete)
+;; (global-set-key (kbd "M-j") 'jedi:complete)
 
 (global-set-key (kbd "M-,") 'highlight-symbol-prev)
 (global-set-key (kbd "M-.") 'highlight-symbol-next)
