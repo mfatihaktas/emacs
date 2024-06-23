@@ -824,6 +824,61 @@
 ;; ------------------------------------  Pandoc  ----------------------------------- ;;
 (straight-use-package 'pandoc)
 
+;; ----------------------------------  Python mode  -------------------------------- ;;
+;; (eval-after-load 'python '(define-key python-mode-map "[1;10A" 'jedi:goto-definition))
+(define-key python-mode-map "[1;10A" 'jedi:goto-definition)
+(define-key python-mode-map "[1;10B" 'jedi:goto-definition-pop-marker)
+
+;; -----------------------------------  C++ mode  ---------------------------------- ;;
+;; Ref: https://www.emacswiki.org/emacs/CPlusPlusMode
+
+(require 'cc-mode)
+
+(setq c-basic-offset 4)
+(setq c-default-style '((other . "linux")))
+
+;; Bind <M-e> to yank.
+(keymap-set c++-mode-map "<remap> <c-end-of-statement>" 'yank)
+
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+
+
+;; (straight-use-package 'rtags)
+;; (require 'rtags)
+
+;; Ref: https://www.mycpu.org/emacs-rtags-helm/
+(use-package rtags
+  :ensure t
+  :hook (c++-mode . rtags-start-process-unless-running)
+  :config (setq rtags-completions-enabled t
+		rtags-use-helm t)
+  :bind (("[1;10A" . rtags-find-symbol-at-point)
+	 ("[1;10B" . rtags-location-stack-back)))
+	 ;; ("[1;10A" . rtags-location-stack-forward)
+	 ;; ("C-c E" . rtags-find-symbol)
+	 ;; ("C-c O" . rtags-find-references)
+	 ;; ("C-c o" . rtags-find-references-at-point)
+	 ;; ("C-c s" . rtags-find-file)
+	 ;; ("C-c v" . rtags-find-virtuals-at-point)
+	 ;; ("C-c F" . rtags-fixit)
+	 ;; ("C-c f" . rtags-location-stack-forward)
+	 ;; ("C-c b" . rtags-location-stack-back)
+	 ;; ("C-c n" . rtags-next-match)
+	 ;; ("C-c p" . rtags-previous-match)
+	 ;; ("C-c P" . rtags-preprocess-file)
+	 ;; ("C-c R" . rtags-rename-symbol)
+	 ;; ("C-c x" . rtags-show-rtags-buffer)
+	 ;; ("C-c T" . rtags-print-symbol-info)
+	 ;; ("C-c t" . rtags-symbol-type)
+	 ;; ("C-c I" . rtags-include-file)
+	 ;; ("C-c i" . rtags-get-include-file-for-symbol)))
+
+
+;; (define-key c++-mode-map "[1;10A" 'magit-status)
+
+(straight-use-package 'cmake-ide)
+(cmake-ide-setup)
+
 ;; ------------------------------------  Keybindings  ----------------------------------- ;;
 (straight-use-package 'find-file-in-project)
 (straight-use-package 'helm)
@@ -910,8 +965,8 @@
 
 ;; (global-set-key "[1;10A" 'dumb-jump-go) ;; (kbd "M-S-<up>")
 ;; (global-set-key "[1;10B" 'dumb-jump-back) ;; (kbd "M-S-<down>")
-(global-set-key "[1;10A" 'jedi:goto-definition) ;; (kbd "M-S-<up>")
-(global-set-key "[1;10B" 'jedi:goto-definition-pop-marker) ;; (kbd "M-S-<down>")
+;; (global-set-key "[1;10A" 'jedi:goto-definition) ;; (kbd "M-S-<up>")
+;; (global-set-key "[1;10B" 'jedi:goto-definition-pop-marker) ;; (kbd "M-S-<down>")
 
 (global-set-key "[1;10D" 'undo-fu-only-undo) ;; (kbd "M-S-<left>")
 (global-set-key "[1;10C" 'undo-fu-only-redo) ;; (kbd "M-S-<right>")
